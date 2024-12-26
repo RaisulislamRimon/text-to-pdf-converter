@@ -1,6 +1,7 @@
 from flask import Flask, request, send_file, render_template, redirect, url_for
 from fpdf import FPDF
 import os
+import chardet
 
 app = Flask(__name__)
 
@@ -20,14 +21,25 @@ def allowed_file(filename):
     """Check if the file has an allowed extension."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def detect_encoding(file_path):
+    with open(file_path, 'rb') as file:
+        raw_data = file.read()
+        result = chardet.detect(raw_data)
+        return result['encoding']
+
+
 def convert_to_pdf(input_path, output_path):
     """Convert a .txt file to a .pdf file."""
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
 
-    # Read the .txt file and add its content to the PDF
-    with open(input_path, 'r') as file:
+    # Detect the file encoding
+    encoding = detect_encoding(input_path)
+
+    # Read the .txt file with utf-8 encoding and add its content to the PDF
+    with open(input_path, 'r', encoding=encoding) as file:
         for line in file:
             pdf.multi_cell(0, 10, txt=line.strip())
 
