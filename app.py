@@ -1,7 +1,6 @@
 from flask import Flask, request, send_file, render_template, redirect, url_for
 from fpdf import FPDF
 import os
-import chardet
 
 app = Flask(__name__)
 
@@ -21,31 +20,25 @@ def allowed_file(filename):
     """Check if the file has an allowed extension."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-def detect_encoding(file_path):
-    with open(file_path, 'rb') as file:
-        raw_data = file.read()
-        result = chardet.detect(raw_data)
-        return result['encoding']
-
-
 def convert_to_pdf(input_path, output_path):
     """Convert a .txt file to a .pdf file."""
-    pdf = FPDF()
+    pdf = FPDF()  # Create the FPDF object
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    # Detect the file encoding
-    encoding = detect_encoding(input_path)
 
     # Add a Unicode-compatible font (e.g., DejaVuSans)
     pdf.add_font('DejaVuSans', '', 'DejaVuSans.ttf', uni=True)
     pdf.set_font('DejaVuSans', size=12)
 
-    # Read the .txt file with utf-8 encoding and add its content to the PDF
-    # with open(input_path, 'r', encoding=encoding) as file:
+    # Read the .txt file with utf-8 encoding
     with open(input_path, 'r', encoding='utf-8') as file:
-        for line in file:
+        lines = file.readlines()
+
+    # Check if the file is empty
+    if not lines:
+        pdf.multi_cell(0, 10, txt="The file is empty.")  # Add a message for empty files
+    else:
+        # Add the content to the PDF
+        for line in lines:
             pdf.multi_cell(0, 10, txt=line.strip())
 
     # Save the PDF
