@@ -38,8 +38,13 @@ def convert_to_pdf(input_path, output_path):
     # Detect the file encoding
     encoding = detect_encoding(input_path)
 
+    # Add a Unicode-compatible font (e.g., DejaVuSans)
+    pdf.add_font('DejaVuSans', '', 'DejaVuSans.ttf', uni=True)
+    pdf.set_font('DejaVuSans', size=12)
+
     # Read the .txt file with utf-8 encoding and add its content to the PDF
-    with open(input_path, 'r', encoding=encoding) as file:
+    # with open(input_path, 'r', encoding=encoding) as file:
+    with open(input_path, 'r', encoding='utf-8') as file:
         for line in file:
             pdf.multi_cell(0, 10, txt=line.strip())
 
